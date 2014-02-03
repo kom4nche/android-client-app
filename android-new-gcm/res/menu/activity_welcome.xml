@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/opciones"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/settings"/>    
+    
+    <item
+        android:id="@+id/closessesion"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_lock_idle_lock"
+        android:title="@string/close"/>
+    
+
+</menu>

@@ -1,4 +1,11 @@
-package net.sgoliver.android.newgcm;
+package cl.molt.app.cliente;
+
+import java.util.Random;
+
+import cl.molt.app.cliente.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -13,6 +20,7 @@ import android.support.v4.app.NotificationCompat;
 public class GCMIntentService extends IntentService 
 {
 	private static final int NOTIF_ALERTA_ID = 1;
+	private int notify_id = 0;
 
 	public GCMIntentService() {
         super("GCMIntentService");
@@ -25,36 +33,42 @@ public class GCMIntentService extends IntentService
         
         String messageType = gcm.getMessageType(intent);
         Bundle extras = intent.getExtras();
+        
+        int number = (new Random().nextInt(100));
 
-        if (!extras.isEmpty()) 
-        {  
-            if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) 
+        if (!extras.isEmpty())
+        {
+            if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType))
             {
-            	mostrarNotification(extras.getString("msg"));
+            	
+                    mostrarNotification(extras.getString("message"),number);
             }
         }
         
         GCMBroadcastReceiver.completeWakefulIntent(intent);
     }
 	
-	private void mostrarNotification(String msg) 
+	
+	private void mostrarNotification(String msg, int notificacion) 
 	{
 		NotificationManager mNotificationManager =    
 				(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); 
 		
 		NotificationCompat.Builder mBuilder = 
-			new NotificationCompat.Builder(this)  
+			new NotificationCompat.Builder(this)
 				.setSmallIcon(R.drawable.ws)  
-				.setContentTitle("+56 9765 6969")  
+				.setContentTitle("Alerta Carwatch!")  
 				.setContentText(msg)
-		        .setDefaults(-1);
+				.setTicker("Alerta!")
+		        .setDefaults(-1)
+		        .setAutoCancel(true);
 		
-		Intent notIntent =  new Intent(this, MainActivity.class);    
+		Intent notIntent =  new Intent(this, WelcomeActivity.class);    
 		PendingIntent contIntent = PendingIntent.getActivity(     
 				this, 0, notIntent, 0);   
 		
 		mBuilder.setContentIntent(contIntent);
 		
-		mNotificationManager.notify(NOTIF_ALERTA_ID, mBuilder.build());
+		mNotificationManager.notify(notificacion, mBuilder.build());
     }
 }

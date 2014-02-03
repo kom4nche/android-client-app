@@ -1,0 +1,21 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Opciones Generales">
+        <CheckBoxPreference
+            android:key="notificaciones"
+            android:title="Activar Notificaciones"
+            android:summary="Activa o desactiva las notificaciones" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Opciones Avanzadas">
+        <EditTextPreference
+            android:key="gcm_url"
+            android:title="GCM Server"
+            android:summary="no cambiar a menos que sepa lo que esta haciendo"
+            android:dialogTitle="Introduce URL del servidor" />
+        <EditTextPreference
+            android:key="sender_id"
+            android:title="Google Sender ID"
+            android:summary="no cambiar a menos que sepa lo que esta haciendo"
+            android:dialogTitle="Introduce Sender ID de Google" />
+    </PreferenceCategory>
+</PreferenceScreen>

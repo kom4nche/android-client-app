@@ -1,4 +1,4 @@
-package net.sgoliver.android.newgcm;
+package cl.molt.app.cliente;
 
 import android.app.Activity;
 import android.content.ComponentName;
