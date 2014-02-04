@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
         EditText editPass;
         Button btnLogin;
         
-        static final String TAG = "Sistema";
+        static final String TAG = "Login";
         boolean login = false;
         
     	private Context context;
@@ -54,6 +54,14 @@ public class MainActivity extends Activity {
                 editName = (EditText) findViewById(R.id.editText1);
                 editPass = (EditText) findViewById(R.id.editText2);
                 btnLogin = (Button) findViewById(R.id.button1);
+                
+    	        SharedPreferences settings = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("name", NAME);
+                editor.putString("pass", PASS);
+                
+                //Confirmamos el almacenamiento.
+                editor.commit();
                 
                 //Recuperamos las preferencias almacenadas
                 SharedPreferences prefs = getSharedPreferences("MisPreferencias",Context.MODE_PRIVATE);
