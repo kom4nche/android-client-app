@@ -13,10 +13,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <permission android:name="net.sgoliver.android.newgcm.permission.C2D_MESSAGE" 
+    <permission android:name="cl.molt.app.cliente.permission.C2D_MESSAGE" 
         android:protectionLevel="signature" />
-    <uses-permission android:name="net.sgoliver.android.newgcm.permission.C2D_MESSAGE" />
+    <uses-permission android:name="cl.molt.app.cliente.permission.C2D_MESSAGE" />
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
         android:allowBackup="true"
