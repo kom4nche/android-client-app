@@ -29,17 +29,17 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <activity android:name="cl.molt.app.cliente.WelcomeActivity" android:label="@string/app_name"></activity><receiver
+        <activity android:name="cl.molt.app.cliente.WelcomeActivity" android:label="@string/app_name"></activity>
+        <receiver
             android:name="cl.molt.app.cliente.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="net.sgoliver.android.newgcm" />
+                <category android:name="cl.molt.app.cliente" />
             </intent-filter>
         </receiver>
         

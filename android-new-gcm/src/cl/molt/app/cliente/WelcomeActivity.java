@@ -16,6 +16,7 @@ import org.ksoap2.transport.HttpTransportSE;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import android.os.Build;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -147,7 +149,7 @@ public class WelcomeActivity extends Activity {
         
         contexto = this;
         
-        if (namedb!=null)
+        if (namedb.length() > 0)
         {registroGCM();}
 	}
 	
@@ -352,6 +354,8 @@ public class WelcomeActivity extends Activity {
 		
 		request.addProperty("usuario", usuario); 
 		request.addProperty("regGCM", regId); 
+		request.addProperty("model", getDeviceName());
+		request.addProperty("imei", getIMEI());
 
 		SoapSerializationEnvelope envelope = 
 				new SoapSerializationEnvelope(SoapEnvelope.VER11);
@@ -383,6 +387,45 @@ public class WelcomeActivity extends Activity {
 		
 		return reg;
 	}
+	
+	public String getDeviceName() {
+		  String manufacturer = Build.MANUFACTURER;
+		  String model = Build.MODEL;
+		  
+		  if (manufacturer.length() == 0) manufacturer = "none";
+		  if (model.length() == 0) model = "no model";
+		  
+		  if (model.startsWith(manufacturer)) {
+		    return capitalize(model);
+		  } else {
+		    return capitalize(manufacturer) + " " + model;
+		  }
+		}
+
+
+		private String capitalize(String s) {
+		  if (s == null || s.length() == 0) {
+		    return "";
+		  }
+		  char first = s.charAt(0);
+		  if (Character.isUpperCase(first)) {
+		    return s;
+		  } else {
+		    return Character.toUpperCase(first) + s.substring(1);
+		  }
+		}
+		
+		public String getIMEI() 
+		{
+			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			// get IMEI
+			String imei = tm.getDeviceId();
+			//String phone = tm.getLine1Number();
+			
+			if (imei.length() == 0) imei = "none";
+			
+			return imei;
+		}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 

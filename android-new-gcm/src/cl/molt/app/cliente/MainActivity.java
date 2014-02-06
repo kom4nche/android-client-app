@@ -27,9 +27,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-        //Estaticos
-        static String NAME = "admin";
-        static String PASS = "1234";
         
         //Elementos layout
         EditText editName;
@@ -55,14 +52,6 @@ public class MainActivity extends Activity {
                 editPass = (EditText) findViewById(R.id.editText2);
                 btnLogin = (Button) findViewById(R.id.button1);
                 
-    	        SharedPreferences settings = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("name", NAME);
-                editor.putString("pass", PASS);
-                
-                //Confirmamos el almacenamiento.
-                editor.commit();
-                
                 //Recuperamos las preferencias almacenadas
                 SharedPreferences prefs = getSharedPreferences("MisPreferencias",Context.MODE_PRIVATE);
                 String name = prefs.getString("name", "");
@@ -73,14 +62,17 @@ public class MainActivity extends Activity {
                 String passdb = prefs2.getString("passdb", "");
                 
                 //Comprobamos nombre y clave de ususario
-                if(name.equals(namedb) && pass.equals(passdb)){
+                if(name.length() > 0)
+                {
+                	if(name.equals(namedb) && pass.equals(passdb)){
                         
-                        //Si el usuario almacenado es correcto, entramos en la app
-                        Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
-                        startActivity(intent);
-                        finish();
+                			//Si el usuario almacenado es correcto, entramos en la app
+                			Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+                				startActivity(intent);
+                					finish();
+                	}
                 }
-                
+
                 login = false;
                 
                 btnLogin.setOnClickListener(new View.OnClickListener() {
