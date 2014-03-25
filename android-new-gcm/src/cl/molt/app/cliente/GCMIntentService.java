@@ -21,6 +21,7 @@ public class GCMIntentService extends IntentService
 {
 	private static final int NOTIF_ALERTA_ID = 1;
 	private int notify_id = 0;
+	private String hora;
 
 	public GCMIntentService() {
         super("GCMIntentService");
@@ -40,8 +41,8 @@ public class GCMIntentService extends IntentService
         {
             if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType))
             {
-            	
-                    mostrarNotification(extras.getString("message"),number);
+            	    hora = extras.getString("hora");
+                    mostrarNotification(extras.getString("message"),number, hora);
             }
         }
         
@@ -49,7 +50,7 @@ public class GCMIntentService extends IntentService
     }
 	
 	
-	private void mostrarNotification(String msg, int notificacion) 
+	private void mostrarNotification(String msg, int notificacion, String hora) 
 	{
 		NotificationManager mNotificationManager =    
 				(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); 

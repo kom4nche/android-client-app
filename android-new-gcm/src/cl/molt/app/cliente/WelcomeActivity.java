@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Vector;
 
 import cl.molt.app.cliente.R;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.KvmSerializable;
+import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
@@ -16,6 +20,13 @@ import org.ksoap2.transport.HttpTransportSE;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+
 import android.os.Build;
 
 import android.os.AsyncTask;
@@ -29,19 +40,32 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.ToggleButton;
+import android.widget.TwoLineListItem;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 
-public class WelcomeActivity extends Activity {
+public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 	
 	private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	
@@ -50,6 +74,8 @@ public class WelcomeActivity extends Activity {
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final String PROPERTY_EXPIRATION_TIME = "onServerExpirationTimeMs";
     private static final String PROPERTY_USER = "user";
+    
+    static final String[] perro = {"a", "b", "c"};
 
     String GCM_URL = "";
     String SENDER_ID = "";    
@@ -60,21 +86,26 @@ public class WelcomeActivity extends Activity {
 
     public static final long EXPIRATION_TIME_MS = 1000 * 3600 * 24 * 7;
 
-    
-
     static final String TAG = "GCM Message"; 
     
     private Context context;
     private String regid;
     private GoogleCloudMessaging gcm;
-    
     //private EditText txtUsuario;
     //private Button btnRegistrar;
     private TextView welcome;
     private String namedb;
-    
 	private Context contexto;
 	private ProgressDialog pd;
+	private ListView lstAlertas;
+	private ToggleButton button1;
+	private TextView infotext;
+	private ImageView imagen;
+	
+	private GoogleMap mapa = null;
+	private int vista = 0;
+	
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -82,9 +113,19 @@ public class WelcomeActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_welcome);
 		
+		welcome = (TextView)findViewById(R.id.welcome_text);
+		lstAlertas = (ListView)findViewById(R.id.lstAlertas);
+		mapa = ((SupportMapFragment) getSupportFragmentManager()
+				   .findFragmentById(R.id.map)).getMap();		
+		
+		
+		button1 = (ToggleButton) findViewById(R.id.toggleButton1);
+		infotext = (TextView) findViewById(R.id.label_act);
+		imagen = (ImageView) findViewById(R.id.imageView1);
+		
+		
 		//txtUsuario = (EditText)findViewById(R.id.txtUsuario);
 		//btnRegistrar = (Button)findViewById(R.id.btnGuadar);
-		welcome = (TextView)findViewById(R.id.welcome_text);
 		
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -149,8 +190,78 @@ public class WelcomeActivity extends Activity {
         
         contexto = this;
         
+        Resources res = getResources();
+        
+        TabHost tabs=(TabHost)findViewById(android.R.id.tabhost);
+        tabs.setup();
+        
+        TabHost.TabSpec spec=tabs.newTabSpec("mitab1");
+        spec.setContent(R.id.tab1);
+        spec.setIndicator("TAB1", 
+        		res.getDrawable(android.R.drawable.ic_btn_speak_now));
+        tabs.addTab(spec);
+        
+        spec=tabs.newTabSpec("mitab2");
+        spec.setContent(R.id.tab2);
+        spec.setIndicator("TAB2", 
+        		res.getDrawable(android.R.drawable.ic_dialog_map));
+        tabs.addTab(spec);
+        
+        spec=tabs.newTabSpec("mitab3");
+        spec.setContent(R.id.tab3);
+        spec.setIndicator("TAB3", 
+        		res.getDrawable(android.R.drawable.ic_dialog_map));
+        tabs.addTab(spec);
+        
+        tabs.setCurrentTab(0);
+        
+        tabs.setOnTabChangedListener(new OnTabChangeListener() {
+			public void onTabChanged(String tabId) {
+				//Log.i("AndroidTabsDemo", "Pulsada pesta�a: " + tabId);
+				if (tabId=="2")
+				{
+        			//Intent intent = new Intent(WelcomeActivity.this, MapFragment.class);
+    				//startActivity(intent);
+    				//finish();
+					
+					
+					
+				}
+			}
+		});
+        
         if (namedb.length() > 0)
+        
         {registroGCM();}
+        
+        
+        button1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+          if (isChecked) {
+           Log.d("info", "Button1 is on!");
+           //textView2.setText("Button2 is ON");
+           
+           infotext.setText("Sistema Activado");
+           String uri = "@drawable/boton_verde";
+
+           int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+           Drawable res = getResources().getDrawable(imageResource);
+           imagen.setImageDrawable(res);
+           
+          } else {
+           Log.d("info", "Button1 is off!");
+           //textView2.setText("Button2 is OFF");
+           
+           infotext.setText("Sistema Desactivado");
+           String uri = "@drawable/boton_rojo";
+
+           int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+           Drawable res = getResources().getDrawable(imageResource);
+           imagen.setImageDrawable(res);
+           
+          }
+            }
+        });
 	}
 	
 //	@Override
@@ -462,10 +573,295 @@ public class WelcomeActivity extends Activity {
                     startActivity(intent);
                     finish();
                     break;
+                    
+			case R.id.menu_vista:
+				alternarVista();
+				break;
+			case R.id.menu_mover:
+				//Centramos el mapa en Espa�a
+				
+				TareaAlertas tarea = new TareaAlertas();
+		        tarea.execute(namedb,"3");	
+				break;
+				
+			case R.id.menu_mover2:
+				//Centramos el mapa en Espa�a
+				
+				TareaAlertas tarea3 = new TareaAlertas();
+		        tarea3.execute(namedb,"15");	
+				break;
+			
+			case R.id.menu_animar:
+				
+				TareaUbicacion tarea2 = new TareaUbicacion();
+		        tarea2.execute(namedb,"2");	
+				
+				
+				//CameraUpdate camUpd2 = 
+				//	CameraUpdateFactory.newLatLngZoom(new LatLng(-39.8330422, -73.2449274), 5F);
+				//mapa.animateCamera(camUpd2);
+				
+				break;
+				
+				
+				
+			case R.id.menu_3d:
+				LatLng madrid = new LatLng(-39.8330422, -73.2449274);
+				CameraPosition camPos = new CameraPosition.Builder()
+					    .target(madrid)   //Centramos el mapa en Madrid
+					    .zoom(13)         //Establecemos el zoom en 19
+					    .bearing(90)      //Establecemos la orientaci�n con el noreste arriba
+					    .tilt(70)         //Bajamos el punto de vista de la c�mara 70 grados
+					    .build();
+				
+				CameraUpdate camUpd3 = 
+						CameraUpdateFactory.newCameraPosition(camPos);
+				
+				mapa.animateCamera(camUpd3);
+				break;
+			case R.id.menu_posicion:
+				CameraPosition camPos2 = mapa.getCameraPosition();
+				LatLng pos = camPos2.target;
+				Toast.makeText(WelcomeActivity.this, 
+						"Lat: " + pos.latitude + " - Lng: " + pos.longitude, 
+						Toast.LENGTH_LONG).show();
+				break;
 
             }
             return super.onOptionsItemSelected(item);
     }
+    
+	private void alternarVista()
+	{
+		vista = (vista + 1) % 4;
+		
+		switch(vista)
+		{
+			case 0:
+				mapa.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+				break;
+			case 1:
+				mapa.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+				break;
+			case 2:
+				mapa.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+				break;
+			case 3:
+				mapa.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+				break;
+		}
+	}
+	
+	
+	private class TareaUbicacion extends AsyncTask<String,Integer,Boolean> {
+		
+		private geoPoint[] listaPuntos;
+		private String datos;
+		 
+	    protected Boolean doInBackground(String... params) {
+	    	
+	    	boolean resul = true;
+	 
+	    	final String NAMESPACE = "http://tesis.mobi/";
+			final String URL="http://tesis.mobi/INFOServer/server.php";
+			final String METHOD_NAME = "getUbicacion";
+			final String SOAP_ACTION = "http://tesis.mobi/getUbicacion";
+
+			SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+			
+			int dos =8;
+			
+			request.addProperty("usuario", params[0]);
+			request.addProperty("cantidad", dos); 
+
+			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+			envelope.dotNet = true;
+
+			envelope.setOutputSoapObject(request);
+
+			HttpTransportSE transporte = new HttpTransportSE(URL);
+
+			try 
+			{
+				transporte.call(SOAP_ACTION, envelope);
+
+				//SoapObject resSoap =(SoapObject)envelope.getResponse();
+				//SoapObject resSoap = (SoapObject) envelope.bodyIn;
+				
+				KvmSerializable resSoap = (KvmSerializable)envelope.bodyIn;
+				Vector<?> responseVector = (Vector<?>) resSoap.getProperty(0);
+				
+				
+				listaPuntos = new geoPoint[responseVector.size()];
+				datos = "Hola: "+responseVector.size();
+				
+				for (int i = 0; i < listaPuntos.length; i++)
+				{
+			           //SoapObject ic = (SoapObject) resSoap.getProperty(i);
+			           SoapObject ic=(SoapObject)responseVector.get(i);
+			            
+			           geoPoint cli = new geoPoint();
+			           cli.lat = Double.parseDouble(ic.getProperty(0).toString());
+			           cli.lng = Double.parseDouble(ic.getProperty(1).toString());
+			           cli.hora = ic.getProperty(2).toString();
+			            
+			           listaPuntos[i] = cli;
+			    }
+			} 
+			catch (Exception e) 
+			{
+				resul = false;
+				Log.d(TAG, "Error registro en mi servidor: " + e.getCause() + " || " + e.getMessage());
+			} 
+	 
+	        return resul;
+	    }
+	    
+	    protected void onPostExecute(Boolean result) {
+	    	
+	    	if (result)
+	    	{
+	    		welcome.setText(datos+listaPuntos[0].lat);
+				CameraUpdate camUpd2 = 
+					CameraUpdateFactory.newLatLngZoom(new LatLng(listaPuntos[0].lat, listaPuntos[0].lng), 16);
+				mapa.animateCamera(camUpd2);
+	    		
+	    	}
+	    	else
+	    	{
+	    		welcome.setText("Error!");
+	    	}
+	    }
+	}
+	
+	
+	
+	private class TareaAlertas extends AsyncTask<String,Integer,Boolean> {
+		
+		private geoAlerta[] listaAlertas;
+		 
+	    protected Boolean doInBackground(String... params) {
+	    	
+	    	boolean resul = true;
+	 
+	    	final String NAMESPACE = "http://tesis.mobi/";
+			final String URL="http://tesis.mobi/INFOServer/server.php";
+			final String METHOD_NAME = "getAlertas";
+			final String SOAP_ACTION = "http://tesis.mobi/getAlertas";
+
+			SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+			
+			request.addProperty("usuario", params[0]);
+			request.addProperty("cantidad", params[1]);
+
+			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+			envelope.dotNet = true;
+
+			envelope.setOutputSoapObject(request);
+
+			HttpTransportSE transporte = new HttpTransportSE(URL);
+
+			try 
+			{
+				transporte.call(SOAP_ACTION, envelope);
+
+				//SoapObject resSoap =(SoapObject)envelope.getResponse();
+				//SoapObject resSoap = (SoapObject) envelope.bodyIn;
+				
+				KvmSerializable resSoap = (KvmSerializable)envelope.bodyIn;
+				Vector<?> responseVector = (Vector<?>) resSoap.getProperty(0);
+				
+				listaAlertas = new geoAlerta[responseVector.size()];
+				
+				for (int i = 0; i < listaAlertas.length; i++) 
+				{
+					
+			           //SoapObject ic = (SoapObject) resSoap.getProperty(i);
+			           SoapObject ic=(SoapObject)responseVector.get(i);
+			            
+			           geoAlerta cli = new geoAlerta();
+			           cli.id = Integer.parseInt(ic.getProperty(0).toString());
+			           cli.hora = ic.getProperty(1).toString();
+			           cli.tipo = ic.getProperty(2).toString();
+			            
+			           listaAlertas[i] = cli;
+			    }
+			} 
+			catch (Exception e) 
+			{
+				resul = false;
+				Log.d(TAG, "Error registro en mi servidor: " + e.getCause() + " || " + e.getMessage());
+			} 
+	 
+	        return resul;
+	    }
+	    
+	    protected void onPostExecute(Boolean result) {
+	    	
+	    	if (result)
+	    	{
+	    		//welcome.setText("Funciona CTM!!"+listaAlertas[0].id);
+				//CameraUpdate camUpd2 = 
+				//	CameraUpdateFactory.newLatLngZoom(new LatLng(listaPuntos[0].lat, listaPuntos[0].lng), 16);
+				//mapa.animateCamera(camUpd2);
+	    		
+				final String[][] datos = new String[2][listaAlertas.length];
+				
+				
+				 
+				for(int i=0; i<listaAlertas.length; i++)
+				{
+					if (listaAlertas[i].tipo.equals("P") )
+					{
+						datos[0][i] = "Origen Alerta: Puertas";
+					}
+					
+					else {
+						
+						datos[0][i] = "Origen Alerta: Desconocido";
+					}
+					
+					datos[1][i] = listaAlertas[i].hora;
+			    }
+				
+				final String[] lista = datos[0];
+					 
+				ArrayAdapter<String> adapter;
+				
+				adapter = new ArrayAdapter<String>(contexto, R.layout.list_item, R.id.text, lista) {
+			        @Override
+			        public View getView(int position, View convertView, ViewGroup parent) {
+			            View view = super.getView(position, convertView, parent);
+			            
+			            //View row= convertView;  
+			            TextView txt = null;
+			            
+			            if(convertView == null){
+			            	LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			            	convertView = inflater.inflate(R.layout.list_item, null);
+			            	txt =(TextView)convertView.findViewById(R.id.text);
+			            	convertView.setTag(txt);                
+			            }else{
+			            	txt = (TextView) convertView.getTag();
+			            }
+
+			            String item = getItem(position);
+
+			            TextView subTitleView = (TextView) view.findViewById(R.id.subtitle);
+			            subTitleView.setText("Hora de activación: " + datos[1][position]);
+
+			            return view;
+			        }};
+				 
+				lstAlertas.setAdapter(adapter);
+	    		
+	    	}
+	    	else
+	    	{
+	    		welcome.setText("Error!");
+	    	}
+	    }
+	}
 
     @Override 
     protected void onDestroy() {
