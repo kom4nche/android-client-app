@@ -13,5 +13,8 @@
     <string name="title_activity_welcome">WelcomeActivity</string>
     <string name="close">Cerrar Sesion</string>
     <string name="settings">Opciones</string>
-
+    <string name="api_key">AIzaSyAP83b4w1TW5BXuORHsZgzjtPUtPyVHMTg</string>
+    <string name="sistema_activado">Desactivar</string>
+    <string name="activar_sistema_2">Activar</string>
+    
 </resources>

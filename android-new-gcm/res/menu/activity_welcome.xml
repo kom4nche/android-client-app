@@ -1,17 +1,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
+    
     <item
         android:id="@+id/opciones"
-        android:showAsAction="always"
+        android:orderInCategory="97"
+        android:showAsAction="ifRoom"
+        android:menuCategory="system"
         android:icon="@android:drawable/ic_menu_preferences"
-        android:title="@string/settings"/>    
+        android:title="@string/settings"/>
     
     <item
         android:id="@+id/closessesion"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom"
+        android:orderInCategory="98"
+        android:showAsAction="always"
+        android:menuCategory="system"
         android:icon="@android:drawable/ic_lock_idle_lock"
         android:title="@string/close"/>
+    
+    <item android:id="@+id/menu_actualizar1"
+        android:orderInCategory="100"
+        android:menuCategory="system"
+        android:showAsAction="never"
+        android:icon="@android:drawable/stat_notify_sync"
+        android:title="Update"/>
     
 
 </menu>

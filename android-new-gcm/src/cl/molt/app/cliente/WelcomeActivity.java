@@ -23,15 +23,19 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.os.Build;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -46,6 +50,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -97,13 +102,15 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
     private String namedb;
 	private Context contexto;
 	private ProgressDialog pd;
+	private ProgressDialog pd2;
 	private ListView lstAlertas;
 	private ToggleButton button1;
 	private TextView infotext;
 	private ImageView imagen;
 	
 	private GoogleMap mapa = null;
-	private int vista = 0;
+	private int vista = 1;
+	private int menuid = 2;
 	
 
 
@@ -118,6 +125,28 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 		mapa = ((SupportMapFragment) getSupportFragmentManager()
 				   .findFragmentById(R.id.map)).getMap();		
 		
+
+		mapa.setInfoWindowAdapter(new InfoWindowAdapter() {
+
+	        @Override
+	        public View getInfoWindow(Marker arg0) {
+	            return null;
+	        }
+
+	        @Override
+	        public View getInfoContents(Marker marker) {
+
+	            View v = getLayoutInflater().inflate(R.layout.marker, null);
+
+	            TextView info= (TextView) v.findViewById(R.id.info);
+
+	            info.setText(marker.getTitle());
+	            
+	            //marker.showInfoWindow();
+
+	            return v;
+	        }
+	    });
 		
 		button1 = (ToggleButton) findViewById(R.id.toggleButton1);
 		infotext = (TextView) findViewById(R.id.label_act);
@@ -197,35 +226,75 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
         
         TabHost.TabSpec spec=tabs.newTabSpec("mitab1");
         spec.setContent(R.id.tab1);
-        spec.setIndicator("TAB1", 
-        		res.getDrawable(android.R.drawable.ic_btn_speak_now));
+        spec.setIndicator("On/Off", 
+        		res.getDrawable(android.R.drawable.ic_lock_power_off));
         tabs.addTab(spec);
         
         spec=tabs.newTabSpec("mitab2");
         spec.setContent(R.id.tab2);
-        spec.setIndicator("TAB2", 
-        		res.getDrawable(android.R.drawable.ic_dialog_map));
+        spec.setIndicator("Alertas", 
+        		res.getDrawable(android.R.drawable.ic_dialog_alert));
         tabs.addTab(spec);
         
         spec=tabs.newTabSpec("mitab3");
         spec.setContent(R.id.tab3);
-        spec.setIndicator("TAB3", 
+        spec.setIndicator("Mapa", 
         		res.getDrawable(android.R.drawable.ic_dialog_map));
         tabs.addTab(spec);
         
-        tabs.setCurrentTab(0);
+        tabs.setCurrentTab(1);
         
         tabs.setOnTabChangedListener(new OnTabChangeListener() {
+			@SuppressLint("NewApi")
 			public void onTabChanged(String tabId) {
 				//Log.i("AndroidTabsDemo", "Pulsada pesta�a: " + tabId);
-				if (tabId=="2")
+				
+				if (tabId.equals("mitab1"))
 				{
-        			//Intent intent = new Intent(WelcomeActivity.this, MapFragment.class);
-    				//startActivity(intent);
-    				//finish();
+					int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
+
+					if (currentAPIVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) 
+					{
+						menuid = 1;
+						invalidateOptionsMenu();
+					}
+					else  menuid = 1;
+
+				}
+				
+				if (tabId.equals("mitab2"))
+				{
+					int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
+
+					if (currentAPIVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) 
+					{
+						menuid = 2;
+						invalidateOptionsMenu();
+					}
+					else  menuid = 2;
 					
+					TareaAlertas tarea3_tab2 = new TareaAlertas();
+			        tarea3_tab2.execute(namedb,"10");
+
+				}
+				
+				if (tabId.equals("mitab3"))
+				{
+					int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
+
+					if (currentAPIVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) 
+					{
+						menuid = 3;
+						invalidateOptionsMenu();
+					}
+					else  menuid = 3;
 					
+					mapa.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 					
+					TareaUbicacion tarea2_tab3 = new TareaUbicacion();
+			        tarea2_tab3.execute(namedb,"1");	
+					
+
 				}
 			}
 		});
@@ -241,7 +310,7 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
            Log.d("info", "Button1 is on!");
            //textView2.setText("Button2 is ON");
            
-           infotext.setText("Sistema Activado");
+           infotext.setText("Sistema OK");
            String uri = "@drawable/boton_verde";
 
            int imageResource = getResources().getIdentifier(uri, null, getPackageName());
@@ -252,7 +321,7 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
            Log.d("info", "Button1 is off!");
            //textView2.setText("Button2 is OFF");
            
-           infotext.setText("Sistema Desactivado");
+           infotext.setText("Alertas Desactivadas");
            String uri = "@drawable/boton_rojo";
 
            int imageResource = getResources().getIdentifier(uri, null, getPackageName());
@@ -262,6 +331,9 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
           }
             }
         });
+        
+		TareaAlertas tarea3_tab2 = new TareaAlertas();
+        tarea3_tab2.execute(namedb,"10");
 	}
 	
 //	@Override
@@ -417,19 +489,19 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 		
 	    @Override
 	    protected void onPreExecute() {
-			pd = new ProgressDialog(contexto, AlertDialog.THEME_HOLO_DARK);
+			pd2 = new ProgressDialog(contexto, AlertDialog.THEME_HOLO_DARK);
 			//pd.setTitle("Processing...");
-			pd.setMessage("registrando...");
-			pd.setCancelable(false);
-			pd.setIndeterminate(true);
-			pd.show();
+			pd2.setMessage("registrando...");
+			pd2.setCancelable(false);
+			pd2.setIndeterminate(true);
+			pd2.show();
 	    }
 
 	    @Override
 	    protected void onPostExecute(String result) {
 	        // Lets the second task to know that first has finished
-			if (pd!=null) {
-				pd.dismiss();
+			if (pd2!=null) {
+				pd2.dismiss();
 			}
 	    }
 	}
@@ -539,11 +611,34 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 		}
 	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) 
-	{
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_welcome, menu);
-        return true;
+	public boolean onCreateOptionsMenu(Menu menu){
+	    if (Build.VERSION.SDK_INT >= 11) {
+	        selectMenu(menu);
+	    }
+	    return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+	    if (Build.VERSION.SDK_INT < 11) {
+	        selectMenu(menu);
+	    }
+	    return true;
+	}
+
+	private void selectMenu(Menu menu) {
+	    menu.clear();
+	    MenuInflater inflater = getMenuInflater();
+	    
+	    if (menuid==1) {
+	        inflater.inflate(R.menu.activity_welcome, menu);
+	    }
+	    if (menuid==2) {
+	        inflater.inflate(R.menu.activity_menu2, menu);
+	    }
+	    if (menuid==3) {
+	        inflater.inflate(R.menu.activity_menu3, menu);
+	    }
 	}
 	
     @Override
@@ -577,21 +672,21 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 			case R.id.menu_vista:
 				alternarVista();
 				break;
-			case R.id.menu_mover:
+			case R.id.menu_ult3:
 				//Centramos el mapa en Espa�a
 				
 				TareaAlertas tarea = new TareaAlertas();
 		        tarea.execute(namedb,"3");	
 				break;
 				
-			case R.id.menu_mover2:
+			case R.id.menu_ult15:
 				//Centramos el mapa en Espa�a
 				
 				TareaAlertas tarea3 = new TareaAlertas();
 		        tarea3.execute(namedb,"15");	
 				break;
 			
-			case R.id.menu_animar:
+			case R.id.menu_ultima_pos:
 				
 				TareaUbicacion tarea2 = new TareaUbicacion();
 		        tarea2.execute(namedb,"2");	
@@ -626,6 +721,10 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 						"Lat: " + pos.latitude + " - Lng: " + pos.longitude, 
 						Toast.LENGTH_LONG).show();
 				break;
+				
+			case R.id.menu_actualizar1:
+
+				break;
 
             }
             return super.onOptionsItemSelected(item);
@@ -633,7 +732,7 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
     
 	private void alternarVista()
 	{
-		vista = (vista + 1) % 4;
+		vista = (vista + 1) % 3;
 		
 		switch(vista)
 		{
@@ -644,9 +743,6 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 				mapa.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 				break;
 			case 2:
-				mapa.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-				break;
-			case 3:
 				mapa.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 				break;
 		}
@@ -669,7 +765,7 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 
 			SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
 			
-			int dos =8;
+			int dos = 1;
 			
 			request.addProperty("usuario", params[0]);
 			request.addProperty("cantidad", dos); 
@@ -717,21 +813,47 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 	        return resul;
 	    }
 	    
+	    @Override
+	    protected void onPreExecute() {
+			pd = new ProgressDialog(contexto, AlertDialog.THEME_HOLO_DARK);
+			//pd.setTitle("Processing...");
+			pd.setMessage("localizando...");
+			pd.setCancelable(false);
+			pd.setIndeterminate(true);
+			pd.show();
+	    }
+	    
+	    @Override
 	    protected void onPostExecute(Boolean result) {
 	    	
 	    	if (result)
 	    	{
-	    		welcome.setText(datos+listaPuntos[0].lat);
+	    		//welcome.setText(datos+listaPuntos[0].lat);
+			    mapa.addMarker(new MarkerOptions()
+		         .position(new LatLng(listaPuntos[0].lat, listaPuntos[0].lng))
+		         .title("Lat: "+listaPuntos[0].lat+" Long: "+listaPuntos[0].lng+"\n"+"Hora: "+listaPuntos[0].hora)
+		         
+		         ).showInfoWindow();
+			    
+
+	    		
 				CameraUpdate camUpd2 = 
 					CameraUpdateFactory.newLatLngZoom(new LatLng(listaPuntos[0].lat, listaPuntos[0].lng), 16);
 				mapa.animateCamera(camUpd2);
-	    		
+				
+
+
 	    	}
 	    	else
 	    	{
 	    		welcome.setText("Error!");
 	    	}
+	    	
+			if (pd!=null) {
+				pd.dismiss();
+			}
 	    }
+	    
 	}
 	
 	
@@ -796,6 +918,17 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 	        return resul;
 	    }
 	    
+	    @Override
+	    protected void onPreExecute() {
+			pd = new ProgressDialog(contexto, AlertDialog.THEME_HOLO_DARK);
+			//pd.setTitle("Processing...");
+			pd.setMessage("conectando...");
+			pd.setCancelable(false);
+			pd.setIndeterminate(true);
+			pd.show();
+	    }
+	    
+	    @Override
 	    protected void onPostExecute(Boolean result) {
 	    	
 	    	if (result)
@@ -860,6 +993,11 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 	    	{
 	    		welcome.setText("Error!");
 	    	}
+	    	
+				if (pd!=null) {
+					pd.dismiss();
+				}
+
 	    }
 	}
 
@@ -867,6 +1005,10 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
     protected void onDestroy() {
     	if (pd!=null) {
 			pd.dismiss();
+		}
+    	
+    	if (pd2!=null) {
+			pd2.dismiss();
 		}
     	super.onDestroy();
     }

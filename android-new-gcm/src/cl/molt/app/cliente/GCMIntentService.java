@@ -57,7 +57,7 @@ public class GCMIntentService extends IntentService
 		
 		NotificationCompat.Builder mBuilder = 
 			new NotificationCompat.Builder(this)
-				.setSmallIcon(R.drawable.ws)  
+				.setSmallIcon(android.R.drawable.stat_sys_warning)  
 				.setContentTitle("Alerta Carwatch!")  
 				.setContentText(msg)
 				.setTicker("Alerta!")

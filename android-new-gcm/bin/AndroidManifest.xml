@@ -7,10 +7,13 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="17" />
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <permission android:name="cl.molt.app.cliente.permission.C2D_MESSAGE" 
@@ -18,12 +21,21 @@
     <uses-permission android:name="cl.molt.app.cliente.permission.C2D_MESSAGE" />
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    
+    <uses-feature android:glEsVersion="0x00020000"
+              android:required="true"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_launcher_car"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+        
+        <meta-data android:name="com.google.android.maps.v2.API_KEY"
+               android:value="AIzaSyAP83b4w1TW5BXuORHsZgzjtPUtPyVHMTg"/>
+            
         <activity
             android:name="cl.molt.app.cliente.MainActivity"
             android:label="@string/app_name" >
@@ -45,6 +57,7 @@
         
         <service android:name="cl.molt.app.cliente.GCMIntentService" />
         <activity android:label="@string/app_name" android:name="cl.molt.app.cliente.OpcionesActivity"></activity>
+        <activity android:name="cl.molt.app.cliente.MapFragment"></activity>
         
         
     </application>
