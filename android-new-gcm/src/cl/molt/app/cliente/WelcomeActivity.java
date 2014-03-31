@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -600,9 +601,19 @@ public class WelcomeActivity  extends android.support.v4.app.FragmentActivity {
 		
 		public String getIMEI() 
 		{
+			
+			String imei = "";
+			
 			TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-			// get IMEI
-			String imei = tm.getDeviceId();
+		    
+			if (tm.getDeviceId() != null){
+		        imei = tm.getDeviceId(); //*** use for mobiles
+		     }
+		    else{
+		        imei = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID); //*** use for tablets
+		     }
+			
+			//String imei = tm.getDeviceId();
 			//String phone = tm.getLine1Number();
 			
 			if (imei.length() == 0) imei = "none";
